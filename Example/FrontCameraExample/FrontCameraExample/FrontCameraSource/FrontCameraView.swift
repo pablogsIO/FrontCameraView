@@ -25,8 +25,9 @@ class FrontCameraView: UIView {
     private var videoPreviewLayer: AVCaptureVideoPreviewLayer?
     private var cameraManager = CameraManager()
     private var draggGesture: UIPanGestureRecognizer?
-    var delegate: FrontCameraDelegate?
     private var finalPosition = Position.upright
+
+    weak var delegate: FrontCameraDelegate?
 
     override init(frame: CGRect) {
         super.init(frame: frame)
@@ -34,16 +35,18 @@ class FrontCameraView: UIView {
         self.draggGesture = UIPanGestureRecognizer(target: self, action: #selector(draggedView(_:)))
 
         self.addGestureRecognizer(draggGesture!)
+        cameraManager.delegate = self
 
         cameraManager.previewFrontCamera(onSuccess: { (previewView) in
             self.videoPreviewLayer = previewView
             self.videoPreviewLayer?.frame = (self.layer.bounds)
             self.layer.addSublayer(self.videoPreviewLayer!)
-        }) { (_) in
-            //Do something with the error
+        }, onError: { (_) in
+            //Do something when there is an error
             self.backgroundColor = UIColor.black
-        }
-        translateView(to: .upright)
+        })
+
+        translateView(toPosition: .upright)
     }
 
     required init?(coder aDecoder: NSCoder) {
@@ -59,34 +62,15 @@ class FrontCameraView: UIView {
         } else {
             switch viewPosition() {
             case .upleft:
-                translateView(to: .upleft)
+                translateView(toPosition: .upleft)
             case .upright:
-                translateView(to: .upright)
+                translateView(toPosition: .upright)
             case .downleft:
-                translateView(to: .downleft)
+                translateView(toPosition: .downleft)
             case .downright:
-                translateView(to: .downright)
+                translateView(toPosition: .downright)
             }
         }
-    }
-
-    func startRecording() {
-
-        let paths = FileManager.default.urls(for: .documentDirectory, in: .userDomainMask)
-
-        let fileUrl = paths[0].appendingPathComponent("output.mov")
-        try? FileManager.default.removeItem(at: fileUrl)
-
-        //outputMovieFile?.startRecording(to: fileUrl, recordingDelegate: self as! AVCaptureFileOutputRecordingDelegate)
-        if let gesture = self.draggGesture {
-            self.removeGestureRecognizer(gesture)
-        }
-        finalPosition = viewPosition()
-    }
-
-    func stopRecording() {
-
-        //outputMovieFile?.stopRecording()
     }
 
     private func viewPosition() -> Position {
@@ -113,7 +97,7 @@ class FrontCameraView: UIView {
         }
     }
 
-    private func translateView(to: Position) {
+    private func translateView(toPosition: Position) {
 
         guard let superView = self.superview else { return }
 
@@ -121,24 +105,27 @@ class FrontCameraView: UIView {
         var finalPlace = CGPoint.zero
         let offset: CGFloat = 5.0
         let duration: CFTimeInterval = 0.5
-        switch to {
+        let superviewWidth = superView.frame.size.width
+        let superviewHeight = superView.frame.size.height
+
+        switch toPosition {
         case .upleft:
             origin = CGPoint(x: 0, y: superView.safeAreaInsets.top)
             finalPlace = CGPoint(x: offset, y: superView.safeAreaInsets.top+offset)
         case .upright:
-            origin = CGPoint(x: superView.frame.size.width-self.frame.size.width, y: superView.safeAreaInsets.top)
-            finalPlace = CGPoint(x: superView.frame.size.width-self.frame.size.width-offset,
+            origin = CGPoint(x: superviewWidth-self.frame.size.width, y: superView.safeAreaInsets.top)
+            finalPlace = CGPoint(x: superviewWidth-self.frame.size.width-offset,
                                  y: superView.safeAreaInsets.top+offset)
         case .downleft:
             origin = CGPoint(x: 0,
-                             y: superView.frame.size.height-self.frame.size.height-superView.safeAreaInsets.bottom)
+                             y: superviewHeight-self.frame.size.height-superView.safeAreaInsets.bottom)
             finalPlace = CGPoint(x: offset,
-                                 y: superView.frame.size.height-self.frame.size.height-offset-superView.safeAreaInsets.bottom)
+                                 y: superviewHeight-self.frame.size.height-offset-superView.safeAreaInsets.bottom)
         case .downright:
-            origin = CGPoint(x: superView.frame.size.width-self.frame.size.width,
-                             y: superView.frame.size.height-self.frame.size.height-superView.safeAreaInsets.bottom)
-            finalPlace = CGPoint(x: superView.frame.size.width-self.frame.size.width-offset,
-                                 y: superView.frame.size.height-self.frame.size.height-offset-superView.safeAreaInsets.bottom)
+            origin = CGPoint(x: superviewWidth-self.frame.size.width,
+                             y: superviewHeight-self.frame.size.height-superView.safeAreaInsets.bottom)
+            finalPlace = CGPoint(x: superviewWidth-self.frame.size.width-offset,
+                                 y: superviewHeight-self.frame.size.height-offset-superView.safeAreaInsets.bottom)
         }
 
         UIView.animate(withDuration: duration) {
@@ -150,17 +137,20 @@ class FrontCameraView: UIView {
         })
 
     }
+
+    func startRecording() {
+        self.cameraManager.startRecording()
+    }
+
+    func stopRecording() {
+        self.cameraManager.stopRecording()
+    }
 }
 
-extension FrontCameraView: AVCaptureFileOutputRecordingDelegate {
+extension FrontCameraView: CameraManagerDelegate {
 
-    func fileOutput(_ output: AVCaptureFileOutput, didFinishRecordingTo outputFileURL: URL,
-                    from connections: [AVCaptureConnection], error: Error?) {
-
-        if error == nil {
-            self.delegate?.videoRecorded(atURL: outputFileURL)
-        } else {
-            self.delegate?.videoRecorded(atURL: nil)
-        }
+    func videoHasBeenRecorded(atURL: URL?) {
+        self.delegate?.videoRecorded(atURL: atURL)
     }
+
 }

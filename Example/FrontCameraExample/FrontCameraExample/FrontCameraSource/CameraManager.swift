@@ -8,12 +8,12 @@
 
 import AVFoundation
 
-protocol CameraManagerProtocol {
+protocol CameraManagerDelegate: class {
 
-    func previewFrontCamera(onSuccess: @escaping (AVCaptureVideoPreviewLayer) -> Void, onError: ((Error) -> Void)?)
+    func videoHasBeenRecorded(atURL: URL?)
 }
 
-class CameraManager: CameraManagerProtocol {
+class CameraManager: NSObject {
 
     enum CameraPreviewError: Swift.Error {
         case videoInputNotValid
@@ -22,6 +22,7 @@ class CameraManager: CameraManagerProtocol {
         case microphoneNotFound
         case noVideoInputAvailable
         case noAudioInputAvalilable
+        case noVideoOutputAvailable
     }
 
     private lazy var captureSession = AVCaptureSession()
@@ -29,6 +30,8 @@ class CameraManager: CameraManagerProtocol {
     private var inputVideo: AVCaptureInput?
     private var inputAudio: AVCaptureInput?
     private var outputMovieFile: AVCaptureMovieFileOutput?
+
+    weak var delegate: CameraManagerDelegate?
 
     func previewFrontCamera(onSuccess: @escaping (AVCaptureVideoPreviewLayer) -> Void, onError: ((Error) -> Void)?) {
 
@@ -97,12 +100,44 @@ class CameraManager: CameraManagerProtocol {
             throw CameraPreviewError.noAudioInputAvalilable
         }
     }
+
     private func configurePhotoOutput() throws {
 
         self.outputMovieFile = AVCaptureMovieFileOutput()
 
         if captureSession.canAddOutput(self.outputMovieFile!) {
             captureSession.addOutput(self.outputMovieFile!)
+        } else {
+            throw CameraPreviewError.noVideoOutputAvailable
+        }
+    }
+
+    public func startRecording() {
+
+        let paths = FileManager.default.urls(for: .documentDirectory, in: .userDomainMask)
+
+        let fileUrl = paths[0].appendingPathComponent("output.mov")
+        try? FileManager.default.removeItem(at: fileUrl)
+
+        outputMovieFile?.startRecording(to: fileUrl, recordingDelegate: self)
+
+    }
+
+    public func stopRecording() {
+
+        outputMovieFile?.stopRecording()
+    }
+}
+
+extension CameraManager: AVCaptureFileOutputRecordingDelegate {
+
+    func fileOutput(_ output: AVCaptureFileOutput, didFinishRecordingTo outputFileURL: URL,
+                    from connections: [AVCaptureConnection], error: Error?) {
+
+        if error == nil {
+            self.delegate?.videoHasBeenRecorded(atURL: outputFileURL)
+        } else {
+            self.delegate?.videoHasBeenRecorded(atURL: nil)
         }
     }
 }
