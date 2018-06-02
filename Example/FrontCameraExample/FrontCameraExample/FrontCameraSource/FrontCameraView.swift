@@ -37,15 +37,6 @@ class FrontCameraView: UIView {
         self.addGestureRecognizer(draggGesture!)
         cameraManager.delegate = self
 
-        cameraManager.previewFrontCamera(onSuccess: { (previewView) in
-            self.videoPreviewLayer = previewView
-            self.videoPreviewLayer?.frame = (self.layer.bounds)
-            self.layer.addSublayer(self.videoPreviewLayer!)
-        }, onError: { (_) in
-            //Do something when there is an error
-            self.backgroundColor = UIColor.black
-        })
-
         translateView(toPosition: .upright)
     }
 
@@ -53,6 +44,43 @@ class FrontCameraView: UIView {
         fatalError("init(coder:) has not been implemented")
     }
 
+    // MARK: Start and stop camera preview
+    func startPreview(completion: @escaping (UIAlertController?, Error?) -> Void) {
+
+        if let alert = cameraManager.cameraAuthorization() {
+            completion(alert, nil)
+        }
+
+        cameraManager.previewFrontCamera { (previewLayer, error) in
+            if let previewView = previewLayer {
+                DispatchQueue.main.async {
+                    self.videoPreviewLayer = previewView
+                    self.videoPreviewLayer?.frame = (self.layer.bounds)
+                    self.layer.addSublayer(self.videoPreviewLayer!)
+                    completion(nil, nil)
+                }
+            }
+            if error != nil {
+                DispatchQueue.main.async {
+                    self.backgroundColor = UIColor.green
+                    completion(nil, error)
+                }
+            }
+        }
+    }
+
+    func stopPreview() {
+        cameraManager.stopPreview()
+    }
+
+    // MARK: Check camera authorization
+    private func checkCameraAuthorization() -> UIAlertController? {
+
+        return cameraManager.cameraAuthorization()
+
+    }
+
+    // MARK: moving frontcamera view
     @objc func draggedView(_ sender: UIPanGestureRecognizer) {
 
         if !(sender.state == UIGestureRecognizerState.ended) {

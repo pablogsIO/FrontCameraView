@@ -7,6 +7,7 @@
 //
 
 import AVFoundation
+import UIKit
 
 protocol CameraManagerDelegate: class {
 
@@ -33,7 +34,7 @@ class CameraManager: NSObject {
 
     weak var delegate: CameraManagerDelegate?
 
-    func previewFrontCamera(onSuccess: @escaping (AVCaptureVideoPreviewLayer) -> Void, onError: ((Error) -> Void)?) {
+    func previewFrontCamera(completion: @escaping (AVCaptureVideoPreviewLayer?, Error?) -> Void) {
 
         DispatchQueue(label: "configuration").async {
             do {
@@ -42,7 +43,7 @@ class CameraManager: NSObject {
                 try self.configurePhotoOutput()
             } catch {
                 DispatchQueue.main.async {
-                    onError!(error)
+                    completion(nil, error)
                 }
                 return
             }
@@ -50,9 +51,15 @@ class CameraManager: NSObject {
                 self.videoPreviewLayer = AVCaptureVideoPreviewLayer(session: self.captureSession)
                 self.videoPreviewLayer?.videoGravity = AVLayerVideoGravity.resizeAspectFill
                 self.captureSession.startRunning()
-                onSuccess(self.videoPreviewLayer!)
+                completion(self.videoPreviewLayer!, nil)
             }
         }
+    }
+
+    func stopPreview() {
+
+        captureSession.stopRunning()
+
     }
 
     private func configureDeviceInputs() throws {
@@ -126,6 +133,45 @@ class CameraManager: NSObject {
     public func stopRecording() {
 
         outputMovieFile?.stopRecording()
+    }
+
+    public func cameraAuthorization() -> UIAlertController? {
+
+        let cameraMediaType = AVMediaType.video
+        let cameraAuthorizationStatus = AVCaptureDevice.authorizationStatus(for: cameraMediaType)
+        var alertController: UIAlertController?
+
+        switch cameraAuthorizationStatus {
+        case .denied, .restricted:
+            alertController = UIAlertController(title: "Settings",
+                                                message: "This app would like to access to your camera. Please, press settings to allow us to access to your camera",
+                                                preferredStyle: .alert)
+
+            let settingsAction = UIAlertAction(title: "Settings", style: .default) { (_) in
+
+                if let appSettings = NSURL(string: UIApplicationOpenSettingsURLString) {
+                    UIApplication.shared.open(appSettings as URL, options: [:], completionHandler: nil)
+                }
+            }
+            alertController?.addAction(settingsAction)
+
+            let cancelAction = UIAlertAction(title: "Cancel",
+                                             style: .cancel,
+                                             handler: nil)
+            alertController?.addAction(cancelAction)
+
+            return alertController
+        case .authorized: break
+        case .notDetermined:
+            AVCaptureDevice.requestAccess(for: cameraMediaType) { granted in
+                if granted {
+                    print("Granted access to \(cameraMediaType)")
+                } else {
+                    print("Denied access to \(cameraMediaType)")
+                }
+            }
+        }
+        return alertController
     }
 }
 

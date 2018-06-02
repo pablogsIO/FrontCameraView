@@ -15,9 +15,17 @@ class ViewController: UIViewController {
 
     override func viewDidLoad() {
         super.viewDidLoad()
+
+        let recordButtonSide = self.view.bounds.size.height/10
+        recordButton = RecordButton(frame: CGRect(x: self.view.bounds.width/2-recordButtonSide/2,
+                                                  y: self.view.bounds.height-recordButtonSide,
+                                                  width: recordButtonSide,
+                                                  height: recordButtonSide))
+
     }
 
     override func viewDidAppear(_ animated: Bool) {
+
         capturePreview = FrontCameraView(frame: CGRect(x: self.view.frame.size.width/2,
                                                        y: self.view.frame.size.height/2,
                                                        width: self.view.frame.size.width/4,
@@ -25,21 +33,21 @@ class ViewController: UIViewController {
 
         capturePreview?.delegate = self
 
-        self.view.addSubview(capturePreview!)
-
-        let recordButtonSide = self.view.bounds.size.height/10
-        recordButton = RecordButton(frame: CGRect(x: self.view.bounds.width/2-recordButtonSide/2,
-                                                  y: self.view.bounds.height/2-recordButtonSide/2,
-                                                  width: recordButtonSide,
-                                                  height: recordButtonSide))
         recordButton?.delegate = self
 
+        self.view.addSubview(capturePreview!)
+        
         self.view.addSubview(recordButton!)
+        capturePreview?.startPreview(completion: { (alertController, _) in
+            if let alertController = alertController {
+                self.present(alertController, animated: true, completion: nil)
+            }
+        })
 
     }
-    override func didReceiveMemoryWarning() {
-        super.didReceiveMemoryWarning()
-        // Dispose of any resources that can be recreated.
+
+    override func viewDidDisappear(_ animated: Bool) {
+        capturePreview?.stopPreview()
     }
 
 }
