@@ -36,14 +36,16 @@ class ViewController: UIViewController {
         recordButton?.delegate = self
 
         self.view.addSubview(capturePreview!)
-        
-        self.view.addSubview(recordButton!)
-        capturePreview?.startPreview(completion: { (alertController, _) in
-            if let alertController = alertController {
-                self.present(alertController, animated: true, completion: nil)
-            }
-        })
 
+        self.view.addSubview(recordButton!)
+
+        if let alertChecAuthorization = capturePreview?.checkCameraAuthorization() {
+            self.present(alertChecAuthorization, animated: true, completion: nil)
+        } else {
+            capturePreview?.startPreview(completion: { (_) in
+            // Do something ...
+            })
+        }
     }
 
     override func viewDidDisappear(_ animated: Bool) {

@@ -45,11 +45,7 @@ class FrontCameraView: UIView {
     }
 
     // MARK: Start and stop camera preview
-    func startPreview(completion: @escaping (UIAlertController?, Error?) -> Void) {
-
-        if let alert = cameraManager.cameraAuthorization() {
-            completion(alert, nil)
-        }
+    func startPreview(completion: @escaping (Error?) -> Void) {
 
         cameraManager.previewFrontCamera { (previewLayer, error) in
             if let previewView = previewLayer {
@@ -57,13 +53,13 @@ class FrontCameraView: UIView {
                     self.videoPreviewLayer = previewView
                     self.videoPreviewLayer?.frame = (self.layer.bounds)
                     self.layer.addSublayer(self.videoPreviewLayer!)
-                    completion(nil, nil)
+                    completion(nil)
                 }
             }
             if error != nil {
                 DispatchQueue.main.async {
                     self.backgroundColor = UIColor.green
-                    completion(nil, error)
+                    completion(error)
                 }
             }
         }
@@ -74,7 +70,7 @@ class FrontCameraView: UIView {
     }
 
     // MARK: Check camera authorization
-    private func checkCameraAuthorization() -> UIAlertController? {
+    public func checkCameraAuthorization() -> UIAlertController? {
 
         return cameraManager.cameraAuthorization()
 
