@@ -12,6 +12,13 @@ A preview front camera UIView in Swift
     <img width="300" src="Images/recordbutton.gif">
 </p>
 
+### Features
+
+- Preview front camera
+- Move the preview UIView to every corner of the screen.
+- Record video
+
+
 
 ### Configure Your App's Info.plist File
 
@@ -28,6 +35,8 @@ For each key, provide a message that explains to the user why your app needs to 
 ## Requirements
 
 Swift 4. Should work with Swift 3
+
+Works on portrait mode
 
 ## Example Project
 

@@ -21,19 +21,16 @@ class ViewController: UIViewController {
                                                   y: self.view.bounds.height-recordButtonSide,
                                                   width: recordButtonSide,
                                                   height: recordButtonSide))
-
-    }
-
-    override func viewDidAppear(_ animated: Bool) {
-
         capturePreview = FrontCameraView(frame: CGRect(x: self.view.frame.size.width/2,
                                                        y: self.view.frame.size.height/2,
                                                        width: self.view.frame.size.width/4,
                                                        height: self.view.frame.size.height/4))
-
         capturePreview?.delegate = self
-
         recordButton?.delegate = self
+
+    }
+
+    override func viewDidAppear(_ animated: Bool) {
 
         self.view.addSubview(capturePreview!)
 

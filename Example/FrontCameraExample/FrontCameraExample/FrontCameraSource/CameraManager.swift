@@ -41,6 +41,7 @@ class CameraManager: NSObject {
                 try self.configureDeviceInputs()
                 try self.configureSessionInputs()
                 try self.configurePhotoOutput()
+                self.addObservers()
             } catch {
                 DispatchQueue.main.async {
                     completion(nil, error)
@@ -144,7 +145,7 @@ class CameraManager: NSObject {
         switch cameraAuthorizationStatus {
         case .denied, .restricted:
             alertController = UIAlertController(title: "Settings",
-                                                message: "This app would like to access to your camera. Please, press settings to allow us to access to your camera",
+                                                message: "Please, press settings to allow us access to your camera",
                                                 preferredStyle: .alert)
 
             let settingsAction = UIAlertAction(title: "Settings", style: .default) { (_) in
@@ -172,6 +173,32 @@ class CameraManager: NSObject {
             }
         }
         return alertController
+    }
+
+    // MARK: Observers
+
+    private func addObservers() {
+        NotificationCenter.default.addObserver(self,
+                                               selector: #selector(sessionWasInterrupted),
+                                               name: .AVCaptureSessionWasInterrupted,
+                                               object: captureSession)
+        NotificationCenter.default.addObserver(self,
+                                               selector: #selector(sessionInterruptionEnded),
+                                               name: .AVCaptureSessionInterruptionEnded,
+                                               object: captureSession)
+    }
+
+    @objc
+    func sessionWasInterrupted(notification: NSNotification) {
+        print("session was interrupted")
+    }
+
+    @objc
+    func sessionInterruptionEnded(notification: NSNotification) {
+
+        if !self.captureSession.isRunning {
+            self.captureSession.startRunning()
+        }
     }
 }
 
