@@ -3,8 +3,8 @@
 
 ![](https://img.shields.io/badge/language-swift-blue.svg)
 ![](https://img.shields.io/badge/version-1.0.0-red.svg)
-[![License](https://img.shields.io/cocoapods/l/RecordButton.svg?style=flat)](https://github.com/pablogsIO/ FrontCameraView)
-[![Platform](https://img.shields.io/cocoapods/p/RecordButton.svg?style=flat)](https://github.com/pablogsIO/ FrontCameraView)
+[![License](https://img.shields.io/cocoapods/l/RecordButton.svg?style=flat)](https://github.com/pablogsIO/FrontCameraView)
+[![Platform](https://img.shields.io/cocoapods/p/RecordButton.svg?style=flat)](https://github.com/pablogsIO/FrontCameraView)
 
 A preview front camera UIView in Swift
 
@@ -56,14 +56,29 @@ TO-DO
 
 ```swift
     var capturePreview: FrontCameraView?
-    override func viewDidAppear(_ animated: Bool) {
+
+    override func viewDidLoad() {
+        super.viewDidLoad()
+
         capturePreview = FrontCameraView(frame: CGRect(x: self.view.frame.size.width/2,
                                                        y: self.view.frame.size.height/2,
                                                        width: self.view.frame.size.width/4,
                                                        height: self.view.frame.size.height/4))
         capturePreview?.delegate = self
 
+
+    }
+
+    override func viewDidAppear(_ animated: Bool) {
+
         self.view.addSubview(capturePreview!)
+        if let alertChecAuthorization = capturePreview?.checkCameraAuthorization() {
+            self.present(alertChecAuthorization, animated: true, completion: nil)
+        } else {
+            capturePreview?.startPreview(completion: { (_) in
+            // Do something ...
+            })
+        }
     }
 ```
 ### Recording video

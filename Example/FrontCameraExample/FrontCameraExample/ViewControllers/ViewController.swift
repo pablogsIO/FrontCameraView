@@ -36,8 +36,8 @@ class ViewController: UIViewController {
 
         self.view.addSubview(recordButton!)
 
-        if let alertChecAuthorization = capturePreview?.checkCameraAuthorization() {
-            self.present(alertChecAuthorization, animated: true, completion: nil)
+        if let alertCheckAuthorization = capturePreview?.checkCameraAuthorization() {
+            self.present(alertCheckAuthorization, animated: true, completion: nil)
         } else {
             capturePreview?.startPreview(completion: { (_) in
             // Do something ...
