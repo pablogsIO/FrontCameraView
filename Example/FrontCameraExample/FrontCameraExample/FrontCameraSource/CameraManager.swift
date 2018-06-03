@@ -95,7 +95,8 @@ class CameraManager: NSObject {
             throw CameraPreviewError.audioInputNotValid
         }
     }
-   private func configureSessionInputs() throws {
+
+    private func configureSessionInputs() throws {
 
         if self.captureSession.canAddInput(inputVideo!) {
             self.captureSession.addInput(self.inputVideo!)
