@@ -34,7 +34,7 @@ For each key, provide a message that explains to the user why your app needs to 
 
 #### Check for camera authorization
 
-In your viewDidAppear, add the following code for asking autorization to use the camera(if user has revoked authorization)
+In your viewDidAppear, add the following code for asking authorization to use the camera(if user has revoked authorization)
 
 ```swift
 if let alertCheckAuthorization = capturePreview?.checkCameraAuthorization() {
