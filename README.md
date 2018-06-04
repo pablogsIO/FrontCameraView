@@ -53,7 +53,7 @@ Works on portrait mode
 
 ## Example Project
 
-You have a fully functional demo in Example folder
+You have a fully functional demo in Example [folder](https://github.com/pablogsIO/FrontCameraView/tree/master/Example/FrontCameraExample)
 
 ## Usage
 
