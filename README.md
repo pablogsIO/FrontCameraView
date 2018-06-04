@@ -32,6 +32,19 @@ For each key, provide a message that explains to the user why your app needs to 
     <img width="500" src="Images/infoplist.png">
 </p>
 
+#### Check for camera authorization
+
+In your viewDidAppear, add the following code for asking autorization to use the camera(if user has revoked authorization)
+
+```swift
+if let alertCheckAuthorization = capturePreview?.checkCameraAuthorization() {
+            self.present(alertCheckAuthorization, animated: true, completion: nil)
+        } else {
+            capturePreview?.startPreview(completion: { (_) in
+            // Do something ...
+            })
+        }
+```
 ## Requirements
 
 Swift 4. Should work with Swift 3
@@ -43,11 +56,6 @@ Works on portrait mode
 You have a fully functional demo in Example folder
 
 ## Usage
-
-### Interface Builder
-
-TO-DO
-
 
 ### Manually
 
@@ -72,8 +80,8 @@ TO-DO
     override func viewDidAppear(_ animated: Bool) {
 
         self.view.addSubview(capturePreview!)
-        if let alertChecAuthorization = capturePreview?.checkCameraAuthorization() {
-            self.present(alertChecAuthorization, animated: true, completion: nil)
+        if let alertCheckAuthorization = capturePreview?.checkCameraAuthorization() {
+            self.present(alertCheckAuthorization, animated: true, completion: nil)
         } else {
             capturePreview?.startPreview(completion: { (_) in
             // Do something ...
@@ -83,11 +91,11 @@ TO-DO
 ```
 ### Recording video
 
-I've added a Record Button from [here](https://github.com/pablogsIO/RecordButton). Simply add this code to viewDidAppear
+I've added a Record Button from [here](https://github.com/pablogsIO/RecordButton). Simply add this code to viewDidLoad and viewDidAppear
 
 ```swift
     var recordButton: RecordButton?
-    override func viewDidAppear(_ animated: Bool) {
+    override func viewDidLoad() {
       .
       .
       .
@@ -98,6 +106,11 @@ I've added a Record Button from [here](https://github.com/pablogsIO/RecordButton
                                                 height: recordButtonSide))
       recordButton?.delegate = self
 
+    }
+    override func viewDidAppear(_ animated: Bool) {
+      .
+      .
+      .
       self.view.addSubview(recordButton!)
 
     }
