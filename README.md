@@ -9,7 +9,7 @@
 A preview front camera UIView in Swift
 
 <p align="center">
-    <img width="300" src="Images/recordbutton.gif">
+    <img width="200" src="Images/duck.gif">
 </p>
 
 ### Features
