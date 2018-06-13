@@ -22,7 +22,7 @@ A preview front camera UIView in Swift
 
 ### Configure Your App's Info.plist File
 
-iOS requires that your app provide static messages to be displayed to the user when the system asks for camera or microphone permission.
+iOS requires that your app provides static messages to be displayed to the user when the system asks for camera or microphone permission.
 
 Include the NSCameraUsageDescription and NSMicrophoneUsageDescription key in your app’s Info.plist file.
 
@@ -60,7 +60,7 @@ You have a fully functional demo in Example [folder](https://github.com/pablogsI
 ### Manually
 
 - Drag FrontCameraView.swift and CameraManager.swift into your project
-- In your ViewController add the following
+- In your ViewController add the following code
 
 ```swift
     var capturePreview: FrontCameraView?
